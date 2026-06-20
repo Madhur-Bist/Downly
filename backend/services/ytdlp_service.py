@@ -11,6 +11,7 @@ from utils.helpers import format_duration, parse_resolution
 
 
 def extract_info(url: str) -> VideoInfo:
+    cookies_file = os.environ.get("COOKIES_FILE")
     opts: dict = {
         "quiet": True,
         "no_warnings": True,
@@ -23,11 +24,13 @@ def extract_info(url: str) -> VideoInfo:
                 "skip": ["dash", "hls", "webpage"],
             }
         },
-        "youtube_include_dash_manifest": False,
         "socket_timeout": 30,
         "retries": 3,
         "extractor_retries": 2,
+        "user_agent": "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.6478.122 Mobile Safari/537.36",
     }
+    if cookies_file and os.path.exists(cookies_file):
+        opts["cookiefile"] = cookies_file
 
     try:
         with yt_dlp.YoutubeDL(opts) as ydl:
@@ -132,6 +135,7 @@ def download_video(
     else:
         format_str = f"{format_id}+bestaudio[ext=m4a]/bestaudio/best"
 
+    cookies_file = os.environ.get("COOKIES_FILE")
     opts: dict = {
         "format": format_str,
         "outtmpl": output_path,
@@ -150,7 +154,10 @@ def download_video(
         "socket_timeout": 30,
         "retries": 3,
         "extractor_retries": 2,
+        "user_agent": "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.6478.122 Mobile Safari/537.36",
     }
+    if cookies_file and os.path.exists(cookies_file):
+        opts["cookiefile"] = cookies_file
 
     try:
         with yt_dlp.YoutubeDL(opts) as ydl:
