@@ -20,10 +20,10 @@ def extract_info(url: str) -> VideoInfo:
         "no_warnings": True,
         "extract_flat": False,
         "ignoreerrors": True,
-        "verbose": True,
         "socket_timeout": 30,
         "retries": 3,
         "extractor_retries": 2,
+        "format": "bestvideo+bestaudio/best",
     }
     if cookies_file:
         if os.path.exists(cookies_file):
