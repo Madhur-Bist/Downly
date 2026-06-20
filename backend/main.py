@@ -7,19 +7,19 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(name)s] %(levelname)s: %(message)s")
 logger = logging.getLogger("downly")
 
-COOKIES_FILE = os.environ.get("COOKIES_FILE")
-COOKIES_CONTENT = os.environ.get("YOUTUBE_COOKIES")
+_cookies_content = os.environ.get("YOUTUBE_COOKIES")
+_cookies_file = os.environ.get("COOKIES_FILE")
 
-if COOKIES_CONTENT and not COOKIES_FILE:
-    cookies_path = "/tmp/cookies.txt"
-    with open(cookies_path, "w") as f:
-        f.write(COOKIES_CONTENT)
-    os.environ["COOKIES_FILE"] = cookies_path
-    logger.info(f"Wrote YouTube cookies to {cookies_path}")
-elif COOKIES_FILE:
-    logger.info(f"Using cookies file: {COOKIES_FILE}")
+if _cookies_content and not _cookies_file:
+    _cookies_path = "/tmp/cookies.txt"
+    with open(_cookies_path, "w") as f:
+        f.write(_cookies_content)
+    os.environ["COOKIES_FILE"] = _cookies_path
+    logger.info(f"Wrote YouTube cookies from YOUTUBE_COOKIES to {_cookies_path}")
+elif _cookies_file:
+    logger.info(f"Using COOKIES_FILE: {_cookies_file}")
 else:
-    logger.warning("No YouTube cookies provided. YouTube downloads may fail due to bot detection.")
+    logger.warning("No YouTube cookies set. YouTube may block server IP.")
 
 from fastapi import FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware

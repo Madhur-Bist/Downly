@@ -2,12 +2,15 @@ import os
 import json
 import tempfile
 import threading
+import logging
 from typing import Optional, Callable
 
 import yt_dlp
 
 from models.schemas import VideoInfo, VideoFormat
 from utils.helpers import format_duration, parse_resolution
+
+logger = logging.getLogger("downly")
 
 
 def extract_info(url: str) -> VideoInfo:
@@ -20,17 +23,21 @@ def extract_info(url: str) -> VideoInfo:
         "ignoreerrors": True,
         "extractor_args": {
             "youtube": {
-                "player_client": ["android", "web"],
-                "skip": ["dash", "hls", "webpage"],
+                "skip": ["dash", "hls"],
             }
         },
         "socket_timeout": 30,
         "retries": 3,
         "extractor_retries": 2,
-        "user_agent": "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.6478.122 Mobile Safari/537.36",
+        "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
     }
-    if cookies_file and os.path.exists(cookies_file):
-        opts["cookiefile"] = cookies_file
+    if cookies_file:
+        if os.path.exists(cookies_file):
+            size = os.path.getsize(cookies_file)
+            opts["cookiefile"] = cookies_file
+            logger.info(f"Using cookies file: {cookies_file} ({size} bytes)")
+        else:
+            logger.warning(f"Cookies file not found: {cookies_file}")
 
     try:
         with yt_dlp.YoutubeDL(opts) as ydl:
@@ -147,14 +154,13 @@ def download_video(
         "concurrent_fragments": 5,
         "extractor_args": {
             "youtube": {
-                "player_client": ["android", "web"],
-                "skip": ["dash", "hls", "webpage"],
+                "skip": ["dash", "hls"],
             }
         },
         "socket_timeout": 30,
         "retries": 3,
         "extractor_retries": 2,
-        "user_agent": "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.6478.122 Mobile Safari/537.36",
+        "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
     }
     if cookies_file and os.path.exists(cookies_file):
         opts["cookiefile"] = cookies_file
