@@ -20,6 +20,7 @@ def extract_info(url: str) -> VideoInfo:
         "no_warnings": True,
         "extract_flat": False,
         "ignoreerrors": False,
+        "format": None,
         "extractor_args": {
             "youtube": {
                 "skip": ["dash", "hls"],
