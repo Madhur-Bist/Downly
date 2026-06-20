@@ -20,9 +20,11 @@ def extract_info(url: str) -> VideoInfo:
         "yt-dlp",
         "--dump-json",
         "--no-download",
+        "--ignore-config",
+        "--no-config",
         "--no-warnings",
         "--ignore-errors",
-        "--format", "best",
+        "--format", "worst",
         "--socket-timeout", "30",
         "--retries", "3",
     ]
