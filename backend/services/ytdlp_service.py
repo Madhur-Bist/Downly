@@ -17,6 +17,8 @@ def extract_info(url: str) -> VideoInfo:
         "extract_flat": False,
         "format": "bestvideo+bestaudio/best",
         "ignoreerrors": True,
+        "extractor_args": {"youtube": {"skip": ["dash", "hls"]}},
+        "youtube_include_dash_manifest": False,
     }
 
     try:

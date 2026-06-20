@@ -1,11 +1,13 @@
 import type { VideoInfo, DownloadProgress } from "@/types";
 
+const API_BASE = import.meta.env.VITE_API_URL || "";
+
 export async function analyzeVideo(url: string): Promise<{
   success: boolean;
   data?: VideoInfo;
   error?: string;
 }> {
-  const res = await fetch("/api/analyze", {
+  const res = await fetch(`${API_BASE}/api/analyze`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ url }),
@@ -30,7 +32,7 @@ export async function startDownload(
   hasAudio: boolean = true,
   title: string = "video"
 ): Promise<{ success: boolean; downloadId?: string; error?: string }> {
-  const res = await fetch("/api/download", {
+  const res = await fetch(`${API_BASE}/api/download`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ url, formatId, hasAudio, title }),
@@ -55,7 +57,7 @@ export function subscribeToProgress(
   onError: (error: string) => void,
   onDone: () => void
 ): () => void {
-  const eventSource = new EventSource(`/api/download/${downloadId}/status`);
+  const eventSource = new EventSource(`${API_BASE}/api/download/${downloadId}/status`);
 
   eventSource.onmessage = (event) => {
     try {
@@ -92,5 +94,5 @@ export function subscribeToProgress(
 }
 
 export function getDownloadFileUrl(downloadId: string): string {
-  return `/api/download/${downloadId}/file`;
+  return `${API_BASE}/api/download/${downloadId}/file`;
 }
