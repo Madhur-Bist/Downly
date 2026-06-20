@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: downly-backend
+    runtime: docker
+    repo: https://github.com/Madhur-Bist/Downly
+    plan: free
+    dockerContext: ./backend
+    dockerfilePath: ./backend/Dockerfile
+    envVars:
+      - key: PORT
+        value: 8000
+
+  - type: web
+    name: downly-frontend
+    runtime: static
+    repo: https://github.com/Madhur-Bist/Downly
+    plan: free
+    buildCommand: cd frontend && npm install && npm run build
+    staticPublishPath: ./frontend/dist
+    envVars:
+      - key: VITE_API_URL
+        value: https://downly-backend.onrender.com
