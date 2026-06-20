@@ -34,12 +34,12 @@ def extract_info(url: str) -> VideoInfo:
 
     try:
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
-        if result.returncode != 0:
-            stderr = result.stderr.strip()
-            logger.warning(f"yt-dlp CLI stderr: {stderr[:500]}")
+        stderr = result.stderr.strip()[:500]
         stdout = result.stdout.strip()
+        if stderr:
+            logger.warning(f"yt-dlp: {stderr}")
         if not stdout:
-            raise ValueError(f"Could not extract video info. {result.stderr.strip()[:200]}")
+            raise ValueError(f"Could not extract video info. {stderr or 'No response from yt-dlp'}")
         raw = json.loads(stdout.splitlines()[0])
     except subprocess.TimeoutExpired:
         raise ValueError("Video analysis timed out.")
