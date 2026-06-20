@@ -12,10 +12,14 @@ _cookies_file = os.environ.get("COOKIES_FILE")
 
 if _cookies_content and not _cookies_file:
     _cookies_path = "/tmp/cookies.txt"
-    with open(_cookies_path, "w") as f:
-        f.write(_cookies_content)
-    os.environ["COOKIES_FILE"] = _cookies_path
-    logger.info(f"Wrote YouTube cookies from YOUTUBE_COOKIES to {_cookies_path}")
+    try:
+        with open(_cookies_path, "w") as f:
+            f.write(_cookies_content)
+        os.environ["COOKIES_FILE"] = _cookies_path
+        _size = os.path.getsize(_cookies_path)
+        logger.info(f"Wrote YouTube cookies ({_size} bytes) to {_cookies_path}")
+    except Exception as ex:
+        logger.error(f"Failed to write cookies file: {ex}")
 elif _cookies_file:
     logger.info(f"Using COOKIES_FILE: {_cookies_file}")
 else:
@@ -59,7 +63,16 @@ async def root():
 
 @app.get("/api/health")
 async def health():
-    return {"status": "ok", "service": "downly"}
+    import yt_dlp
+    cf = os.environ.get("COOKIES_FILE", "")
+    has_cookies = bool(cf and os.path.exists(cf))
+    return {
+        "status": "ok",
+        "service": "downly",
+        "yt_dlp_version": yt_dlp.version.__version__,
+        "cookies_file": cf if has_cookies else None,
+        "has_cookies": has_cookies,
+    }
 
 
 if __name__ == "__main__":
