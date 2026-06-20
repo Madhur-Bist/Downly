@@ -33,7 +33,7 @@ def extract_info(url: str) -> VideoInfo:
     cmd.append(url)
 
     try:
-        result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=90)
         stderr = result.stderr.strip()[:500]
         stdout = result.stdout.strip()
         if stderr:
