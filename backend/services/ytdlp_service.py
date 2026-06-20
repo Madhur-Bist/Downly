@@ -16,43 +16,43 @@ logger = logging.getLogger("downly")
 def extract_info(url: str) -> VideoInfo:
     cookies_file = os.environ.get("COOKIES_FILE")
     opts: dict = {
-        "quiet": False,
-        "no_warnings": False,
+        "quiet": True,
+        "no_warnings": True,
         "extract_flat": False,
         "ignoreerrors": True,
-        "verbose": True,
         "socket_timeout": 30,
         "retries": 3,
         "extractor_retries": 2,
     }
-    if cookies_file:
-        if os.path.exists(cookies_file):
-            size = os.path.getsize(cookies_file)
-            opts["cookiefile"] = cookies_file
-            logger.info(f"Using cookies file: {cookies_file} ({size} bytes)")
-        else:
-            logger.warning(f"Cookies file not found: {cookies_file}")
+    if cookies_file and os.path.exists(cookies_file):
+        opts["cookiefile"] = cookies_file
+        logger.info(f"Cookies loaded ({os.path.getsize(cookies_file)} bytes)")
 
     try:
         with yt_dlp.YoutubeDL(opts) as ydl:
             raw = ydl.extract_info(url, download=False)
     except yt_dlp.utils.DownloadError as e:
         msg = str(e)
-        logger.error(f"yt-dlp DownloadError: {msg}")
-        raise ValueError(f"Failed to analyze video: {msg}")
+        if "Unsupported URL" in msg:
+            raise ValueError("Unsupported URL.")
+        logger.warning(f"yt-dlp DownloadError: {msg}")
+        raise ValueError(f"Video unavailable. {msg[:200]}")
     except Exception as e:
-        logger.error(f"yt-dlp unexpected error", exc_info=True)
-        raise ValueError(f"Failed to analyze video: {str(e)[:200]}")
+        logger.error(f"yt-dlp error", exc_info=True)
+        raise ValueError(str(e)[:300])
 
     if not raw:
-        raise ValueError("Could not extract video information. Video may be blocked in your region.")
-    if not raw.get("formats"):
-        logger.warning(f"extract_info returned no formats. Keys: {list(raw.keys())}")
-        raise ValueError("No formats found. Video may be blocked or region-restricted.")
+        raise ValueError("Could not extract video info. URL may be invalid.")
+
+    raw_formats = raw.get("formats") or []
+    if not raw_formats:
+        logger.warning(f"No formats in response. Keys: {list(raw.keys())}")
+        if raw.get("title"):
+            raise ValueError(f"No downloadable formats found for '{raw['title']}'.")
+        raise ValueError("No formats found.")
+
     if raw.get("is_live"):
-        raise ValueError("Live streams are not supported for download.")
-    if raw.get("age_limit", 0) and raw["age_limit"] > 18:
-        raise ValueError("Age-restricted videos cannot be downloaded.")
+        raise ValueError("Live streams are not supported.")
 
     duration_seconds = raw.get("duration") or 0
 
