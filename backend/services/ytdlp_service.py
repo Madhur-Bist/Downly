@@ -19,7 +19,6 @@ def extract_info(url: str) -> VideoInfo:
         "quiet": True,
         "no_warnings": True,
         "extract_flat": False,
-        "format": "bestvideo+bestaudio/best",
         "ignoreerrors": False,
         "extractor_args": {
             "youtube": {
