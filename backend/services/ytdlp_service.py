@@ -16,14 +16,14 @@ logger = logging.getLogger("downly")
 def extract_info(url: str) -> VideoInfo:
     cookies_file = os.environ.get("COOKIES_FILE")
     opts: dict = {
-        "quiet": True,
-        "no_warnings": True,
+        "quiet": False,
+        "no_warnings": False,
         "extract_flat": False,
         "ignoreerrors": True,
+        "verbose": True,
         "socket_timeout": 30,
         "retries": 3,
         "extractor_retries": 2,
-        "format": "bestvideo+bestaudio/best",
     }
     if cookies_file:
         if os.path.exists(cookies_file):
