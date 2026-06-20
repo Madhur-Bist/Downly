@@ -20,12 +20,13 @@ def extract_info(url: str) -> VideoInfo:
         "no_warnings": True,
         "extract_flat": False,
         "format": "bestvideo+bestaudio/best",
-        "ignoreerrors": True,
+        "ignoreerrors": False,
         "extractor_args": {
             "youtube": {
                 "skip": ["dash", "hls"],
             }
         },
+        "verbose": True,
         "socket_timeout": 30,
         "retries": 3,
         "extractor_retries": 2,
@@ -36,6 +37,9 @@ def extract_info(url: str) -> VideoInfo:
             size = os.path.getsize(cookies_file)
             opts["cookiefile"] = cookies_file
             logger.info(f"Using cookies file: {cookies_file} ({size} bytes)")
+            with open(cookies_file) as f:
+                first = f.read(500)
+            logger.info(f"Cookies preview: {first}")
         else:
             logger.warning(f"Cookies file not found: {cookies_file}")
 
@@ -53,7 +57,7 @@ def extract_info(url: str) -> VideoInfo:
         raise ValueError(f"Failed to analyze video: {str(e)[:200]}")
 
     if not raw:
-        raise ValueError("Could not extract video information. The URL might be invalid.")
+        raise ValueError(f"Could not extract video information. Video may be blocked in your region.")
     if raw.get("is_live"):
         raise ValueError("Live streams are not supported for download.")
     if raw.get("age_limit", 0) and raw["age_limit"] > 18:
