@@ -57,7 +57,10 @@ def extract_info(url: str) -> VideoInfo:
         raise ValueError(f"Failed to analyze video: {str(e)[:200]}")
 
     if not raw:
-        raise ValueError(f"Could not extract video information. Video may be blocked in your region.")
+        raise ValueError("Could not extract video information. Video may be blocked in your region.")
+    if raw.get("requested_formats") is None and raw.get("formats") is None:
+        logger.warning(f"extract_info returned data but no formats. Keys: {list(raw.keys())}")
+        raise ValueError("No formats found. Video may be blocked or region-restricted.")
     if raw.get("is_live"):
         raise ValueError("Live streams are not supported for download.")
     if raw.get("age_limit", 0) and raw["age_limit"] > 18:
