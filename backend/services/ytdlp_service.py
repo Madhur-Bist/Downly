@@ -1,5 +1,6 @@
 import os
 import json
+import subprocess
 import tempfile
 import threading
 import logging
@@ -15,40 +16,41 @@ logger = logging.getLogger("downly")
 
 def extract_info(url: str) -> VideoInfo:
     cookies_file = os.environ.get("COOKIES_FILE")
-    opts: dict = {
-        "quiet": True,
-        "no_warnings": True,
-        "extract_flat": False,
-        "ignoreerrors": True,
-        "socket_timeout": 30,
-        "retries": 3,
-        "extractor_retries": 2,
-    }
+    cmd = [
+        "yt-dlp",
+        "--dump-json",
+        "--no-download",
+        "--no-warnings",
+        "--ignore-errors",
+        "--extractor-args", "youtube:skip=dash,hls",
+        "--socket-timeout", "30",
+        "--retries", "3",
+    ]
     if cookies_file and os.path.exists(cookies_file):
-        opts["cookiefile"] = cookies_file
-        logger.info(f"Cookies loaded ({os.path.getsize(cookies_file)} bytes)")
+        cmd.extend(["--cookies", cookies_file])
+        logger.info(f"Using cookies ({os.path.getsize(cookies_file)} bytes)")
+
+    cmd.append(url)
 
     try:
-        with yt_dlp.YoutubeDL(opts) as ydl:
-            raw = ydl.extract_info(url, download=False)
-    except yt_dlp.utils.DownloadError as e:
-        msg = str(e)
-        if "Unsupported URL" in msg:
-            raise ValueError("Unsupported URL.")
-        logger.warning(f"yt-dlp DownloadError: {msg}")
-        raise ValueError(f"Video unavailable. {msg[:200]}")
-    except Exception as e:
-        logger.error(f"yt-dlp error", exc_info=True)
-        raise ValueError(str(e)[:300])
-
-    if not raw:
-        raise ValueError("Could not extract video info. URL may be invalid.")
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
+        if result.returncode != 0:
+            stderr = result.stderr.strip()
+            logger.warning(f"yt-dlp CLI stderr: {stderr[:500]}")
+        stdout = result.stdout.strip()
+        if not stdout:
+            raise ValueError(f"Could not extract video info. {result.stderr.strip()[:200]}")
+        raw = json.loads(stdout.splitlines()[0])
+    except subprocess.TimeoutExpired:
+        raise ValueError("Video analysis timed out.")
+    except json.JSONDecodeError as e:
+        raise ValueError(f"Failed to parse video info: {e}")
 
     raw_formats = raw.get("formats") or []
     if not raw_formats:
-        logger.warning(f"No formats in response. Keys: {list(raw.keys())}")
+        logger.warning(f"No formats found. Keys: {list(raw.keys())}")
         if raw.get("title"):
-            raise ValueError(f"No downloadable formats found for '{raw['title']}'.")
+            raise ValueError(f"No downloadable formats for '{raw['title']}'.")
         raise ValueError("No formats found.")
 
     if raw.get("is_live"):
