@@ -1,6 +1,7 @@
 import json
 import asyncio
 import time
+import logging
 
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
@@ -8,6 +9,8 @@ from fastapi.responses import StreamingResponse
 from models.schemas import AnalyzeRequest, AnalyzeResponse
 from services.ytdlp_service import extract_info
 from utils.helpers import validate_url
+
+logger = logging.getLogger("downly")
 
 router = APIRouter()
 
@@ -39,9 +42,13 @@ async def analyze(request: AnalyzeRequest):
         return AnalyzeResponse(success=False, error=err)
 
     try:
+        logger.info(f"Analyzing URL: {request.url[:80]}")
         info = await asyncio.to_thread(extract_info, request.url)
+        logger.info(f"Analysis complete: {info.title}")
         return AnalyzeResponse(success=True, data=info)
     except ValueError as e:
+        logger.warning(f"Analysis failed for {request.url[:80]}: {e}")
         return AnalyzeResponse(success=False, error=str(e))
     except Exception as e:
+        logger.error(f"Analysis error for {request.url[:80]}: {e}", exc_info=True)
         return AnalyzeResponse(success=False, error=f"An unexpected error occurred: {str(e)[:200]}")

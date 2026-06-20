@@ -19,6 +19,8 @@ def extract_info(url: str) -> VideoInfo:
         "ignoreerrors": True,
         "extractor_args": {"youtube": {"skip": ["dash", "hls"]}},
         "youtube_include_dash_manifest": False,
+        "socket_timeout": 30,
+        "retries": 3,
     }
 
     try:
@@ -36,6 +38,10 @@ def extract_info(url: str) -> VideoInfo:
 
     if not raw:
         raise ValueError("Could not extract video information. The URL might be invalid.")
+    if raw.get("is_live"):
+        raise ValueError("Live streams are not supported for download.")
+    if raw.get("age_limit", 0) and raw["age_limit"] > 18:
+        raise ValueError("Age-restricted videos cannot be downloaded.")
 
     duration_seconds = raw.get("duration") or 0
 
