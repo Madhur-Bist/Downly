@@ -19,7 +19,7 @@ def extract_info(url: str) -> VideoInfo:
         "quiet": True,
         "no_warnings": True,
         "extract_flat": False,
-        "ignoreerrors": False,
+        "ignoreerrors": True,
         "verbose": True,
         "socket_timeout": 30,
         "retries": 3,
