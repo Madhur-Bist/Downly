@@ -31,8 +31,8 @@
 <br/>
 
 ---
-
-https://github.com/user-attachments/assets/9edc2b70-36ec-42c0-9e2c-e2878f31316f
+check this :
+https://downly-qfpv.onrender.com
 
 ---
 
@@ -339,11 +339,6 @@ npm run dev
 
 The Vite dev server proxies `/api/*` to the backend — no CORS issues.
 
----
-
-## 📄 License
-
-This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
 
 ---
 
