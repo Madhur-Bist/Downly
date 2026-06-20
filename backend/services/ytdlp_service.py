@@ -20,26 +20,16 @@ def extract_info(url: str) -> VideoInfo:
         "no_warnings": True,
         "extract_flat": False,
         "ignoreerrors": False,
-        "format": None,
-        "extractor_args": {
-            "youtube": {
-                "skip": ["dash", "hls"],
-            }
-        },
         "verbose": True,
         "socket_timeout": 30,
         "retries": 3,
         "extractor_retries": 2,
-        "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
     }
     if cookies_file:
         if os.path.exists(cookies_file):
             size = os.path.getsize(cookies_file)
             opts["cookiefile"] = cookies_file
             logger.info(f"Using cookies file: {cookies_file} ({size} bytes)")
-            with open(cookies_file) as f:
-                first = f.read(500)
-            logger.info(f"Cookies preview: {first}")
         else:
             logger.warning(f"Cookies file not found: {cookies_file}")
 
@@ -48,18 +38,16 @@ def extract_info(url: str) -> VideoInfo:
             raw = ydl.extract_info(url, download=False)
     except yt_dlp.utils.DownloadError as e:
         msg = str(e)
-        if "Unsupported URL" in msg:
-            raise ValueError(f"Unsupported URL. yt-dlp could not extract info from this link.")
-        if "Video unavailable" in msg:
-            raise ValueError("Video is unavailable or private.")
+        logger.error(f"yt-dlp DownloadError: {msg}")
         raise ValueError(f"Failed to analyze video: {msg}")
     except Exception as e:
+        logger.error(f"yt-dlp unexpected error", exc_info=True)
         raise ValueError(f"Failed to analyze video: {str(e)[:200]}")
 
     if not raw:
         raise ValueError("Could not extract video information. Video may be blocked in your region.")
-    if raw.get("requested_formats") is None and raw.get("formats") is None:
-        logger.warning(f"extract_info returned data but no formats. Keys: {list(raw.keys())}")
+    if not raw.get("formats"):
+        logger.warning(f"extract_info returned no formats. Keys: {list(raw.keys())}")
         raise ValueError("No formats found. Video may be blocked or region-restricted.")
     if raw.get("is_live"):
         raise ValueError("Live streams are not supported for download.")
