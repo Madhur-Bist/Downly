@@ -17,10 +17,16 @@ def extract_info(url: str) -> VideoInfo:
         "extract_flat": False,
         "format": "bestvideo+bestaudio/best",
         "ignoreerrors": True,
-        "extractor_args": {"youtube": {"skip": ["dash", "hls"]}},
+        "extractor_args": {
+            "youtube": {
+                "player_client": ["android", "web"],
+                "skip": ["dash", "hls", "webpage"],
+            }
+        },
         "youtube_include_dash_manifest": False,
         "socket_timeout": 30,
         "retries": 3,
+        "extractor_retries": 2,
     }
 
     try:
@@ -135,7 +141,15 @@ def download_video(
         "no_warnings": True,
         "extract_flat": False,
         "concurrent_fragments": 5,
-        "extractor_args": {"youtube": {"skip": ["dash", "hls"]}},
+        "extractor_args": {
+            "youtube": {
+                "player_client": ["android", "web"],
+                "skip": ["dash", "hls", "webpage"],
+            }
+        },
+        "socket_timeout": 30,
+        "retries": 3,
+        "extractor_retries": 2,
     }
 
     try:
