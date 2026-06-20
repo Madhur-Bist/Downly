@@ -62,7 +62,7 @@ https://github.com/user-attachments/assets/9edc2b70-36ec-42c0-9e2c-e2878f31316f
 ### 1. Clone & Install
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/Downly.git
+git clone https://github.com/Madhur-Bist/Downly.git
 cd Downly
 
 # Backend
@@ -348,5 +348,5 @@ This project is licensed under the **MIT License** — see the [LICENSE](LICENSE
 ---
 
 <p align="center">
-  Made with ❤️ by <a href="https://github.com/YOUR_USERNAME">@YOUR_USERNAME</a>
+  Made with ❤️ by <a href="https://github.com/Madhur-Bist">@MadhurBist</a>
 </p>
