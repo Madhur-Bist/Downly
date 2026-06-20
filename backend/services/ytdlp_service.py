@@ -21,8 +21,6 @@ def extract_info(url: str) -> VideoInfo:
         "--dump-json",
         "--no-download",
         "--no-warnings",
-        "--ignore-errors",
-        "--extractor-args", "youtube:skip=dash,hls",
         "--socket-timeout", "30",
         "--retries", "3",
     ]
